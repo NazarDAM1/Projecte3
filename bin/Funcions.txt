@@ -1,0 +1,86 @@
+##select current_timestamp()+'10hr';
+##select current_timestamp();
+SELECT DATE_SUB('2022-05-16 14:00:00', INTERVAL 24 HOUR);
+SELECT DATE_SUB('2022-05-16 14:00:00', INTERVAL 1 hour);
+select dies.id, dies.nom_dia, activitats.nom from dies,activitats,es_fa where
+activitats.id = es_fa.id_activitat and es_fa.id_dia = dies.id;
+select (curdate());
+select DATE_FORMAT(NOW( ), "%H:%i" );
+select time();
+select DATE_SUB(curdate(), );
+
+SELECT DATE_FORMAT(NOW( ), "%H:%i" );
+select date('Y-m-d', strtotime('next tuesday'));
+select (7-2)%7;
+select (curdate())
+union
+select DATE_FORMAT(NOW( ), "%H:%i" );
+SELECT CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )) AS ConcatenatedString; 
+
+SELECT DATE_SUB(CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )), INTERVAL 1 hour) AS ConcatenatedString; 
+#colectives
+select dies.id as _dia from es_fa,dies,activitats,colectives where 
+activitats.id = colectives.id 
+and es_fa.id_activitat = activitats.id 
+and dies.id = es_fa.id_dia and activitats.id = 1;
+
+select activitats.hora_inici as _dia from es_fa,dies,activitats,colectives where 
+activitats.id = colectives.id 
+and es_fa.id_activitat = activitats.id 
+and dies.id = es_fa.id_dia and activitats.id = 1;
+
+select dayofweek(curdate());
+
+
+SELECT DATE_add(DATE_SUB(CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )), INTERVAL (select dayofweek(curdate())) day), interval 7 day ) AS ConcatenatedString; 
+
+SELECT DATE_add CONCAT(((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )), INTERVAL (select dayofweek(curdate())) day) AS ConcatenatedString; 
+SELECT DATE_add(DATE_SUB(CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )), INTERVAL dayofweek(curdate()) day),interval 6 day) AS ConcatenatedString; 
+
+select (DATE_add(CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )),interval 1 day) - (CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" ))));
+select (Date_add(CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" )),interval 24 hour));
+
+SELECT DATE_add(DATE_SUB(CONCAT((curdate()), " ",'19:40:40'), INTERVAL (select dayofweek(curdate())) day), interval 2+7 day );
+
+
+select CONCAT((curdate()), " ",DATE_FORMAT(NOW( ), "%H:%i" ));
+select (CONCAT('2002-03-07', " ",'19:40:00')-(CONCAT('2002-03-07', " ",'19:20:00')));
+
+
+SELECT TIMEDIFF((CONCAT('2002-03-07', " ",'19:40:00')),CONCAT('2002-03-07', " ",'19:20:00'));
+
+call reserva_act_colectiva('xx',2);
+
+DELIMITER //
+CREATE PROCEDURE reserva_act_colectiva(in _dni text, in _id int)
+ BEGIN
+ #saber dia real de activitat per reservar
+ DECLARE _diaAct int;
+  DECLARE _horaAct int;
+ DECLARE _diaAvui int;
+  DECLARE _diaRealAct date;
+  DECLARE _diaRealActMes24 date;
+  select activitats.hora_inici as _dia into _horaAct from es_fa,dies,activitats,colectives where 
+activitats.id = colectives.id 
+and es_fa.id_activitat = activitats.id 
+and dies.id = es_fa.id_dia and activitats.id = 1;
+ select dayofweek(curdate()) into _diaAvui;
+select dies.id as _dia into _diaAct from es_fa,dies,activitats,colectives where 
+activitats.id = colectives.id 
+and es_fa.id_activitat = activitats.id 
+and dies.id = es_fa.id_dia and activitats.id =_id;
+select _diaAct,_horaAct,_diaAvui,_diaRealAct,_diaRealActMes24;
+
+ IF _diaAct < _diaAvui THEN
+SELECT DATE_add(DATE_SUB(CONCAT((curdate()), " ",DATE_FORMAT(_horaAct, "%H:%i" )), INTERVAL (select dayofweek(curdate())) day), interval _diaAct+7 day ) into _diaRealAct;
+ else 
+ SELECT DATE_add(DATE_SUB(CONCAT((curdate()), " ",DATE_FORMAT(_horaAct, "%H:%i" )), INTERVAL (select dayofweek(curdate())) day), interval _diaAct day ) into _diaRealAct; 
+ end if;
+ 
+  select DATE_add(_diaRealAct, interval 1 day ) into _diaRealActMes24;
+  IF _diaRealActMes24 <= _diaRealAct then
+   select 'asd';
+  end if;
+  select _diaAct,_horaAct,_diaAvui,_diaRealAct,_diaRealActMes24;
+ END
+//
